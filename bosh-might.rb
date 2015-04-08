@@ -10,7 +10,7 @@ AWS.config(:access_key_id     => ENV['AWS_ACCESS_KEY_ID'],
 ec2                 = AWS::EC2.new
 cf_release_version  = ARGV[0]
 #ami_name            = `curl -s https://bosh-lite-build-artifacts.s3.amazonaws.com/ami/bosh-lite-ami.list |tail -1`.chop
-ami_name            = 'ami-80c8b0e8' #boshlite-2811 https://github.com/cloudfoundry/bosh-lite/blob/master/Vagrantfile#L20
+ami_name            = 'ami-5692b93e' #boshlite-9000.11.0 https://github.com/cloudfoundry/bosh-lite/blob/master/Vagrantfile#L20
 instance_type       = 'm3.xlarge'
 $ssh_username       = 'ubuntu'
 $prefix              = "bosh-might".blue_on_black + ": ".yellow
@@ -114,9 +114,9 @@ ssh_command "sudo chown ubuntu:ubuntu /home/ubuntu/tmp"
 ssh_command "bosh -n login admin admin"
 term_out "Download bosh-lite stemcell"
 #TODO: should have a way to get the latest bosh-lite stemcell and download it instead of hard coding it
-ssh_command "bosh download public stemcell bosh-stemcell-21-warden-boshlite-ubuntu-trusty-go_agent.tgz", true
+ssh_command "curl -L https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent -o latest-bosh-lite-stemcell.tgz", true
 term_out "Upload bosh-lite stemcell"
-ssh_command "bosh upload stemcell bosh-stemcell-21-warden-boshlite-ubuntu-trusty-go_agent.tgz"
+ssh_command "bosh upload stemcell latest-bosh-lite-stemcell.tgz"
 term_out "Upload Bosh Release"
 if cf_release_version.integer?
   ssh_command "cd ~/workspace/cf-release; git checkout v#{cf_release_version}"
@@ -124,12 +124,12 @@ if cf_release_version.integer?
   ssh_command "cd ~/workspace/cf-release; bosh -n upload release ./releases/cf-#{cf_release_version}.yml"
 else
   ssh_command "cd ~/workspace/cf-release; git checkout #{cf_release_version}"
-  ssh_command "cd ~/workspace/cf-release/; ./update"
-  ssh_command "cd ~/workspace/cf-release; bosh -n create release"
-  ssh_command "cd ~/workspace/cf-release; bosh -n upload release"
+  ssh_command "cd ~/workspace/cf-release/; ./update", true
+  ssh_command "cd ~/workspace/cf-release; bosh -n create release", true
+  ssh_command "cd ~/workspace/cf-release; bosh -n upload release", true
 end
 term_out "Spiff manifest"
-ssh_command "cd ~/workspace/cf-release; ./bosh-lite/make_manifest"
+ssh_command "cd ~/workspace/cf-release; ./bosh-lite/make_manifest", true
 term_out "Bosh Deploy"
 ssh_command "bosh -n deploy", true
 
