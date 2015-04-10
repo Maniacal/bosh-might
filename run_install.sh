@@ -12,5 +12,19 @@ gem install colored --no-ri --no-rdoc
 sed -i 's/5000m/10000m/g' /var/vcap/data/jobs/director/fake-job-template-version-*/config/nginx.conf
 monit restart director_nginx
 
+# Apply iptables rules
+iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 80 -j DNAT --to-destination 10.244.0.34:80
+iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 443 -j DNAT --to-destination 10.244.0.34:443
+iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 4443 -j DNAT --to-destination 10.244.0.34:4443
+
+# Save iptables
+/sbin/iptables-save > /etc/iptables.rules
+
+# Restore on restart
+if ! grep iptables-restore /etc/network/interfaces.d/eth0.cfg; then
+  echo "  pre-up iptables-restore < /etc/iptables.rules" >> /etc/network/interfaces.d/eth0.cfg
+fi
+
 # Run bosh might
-ruby ./bosh-might.rb "$cf_release_version" "$ip_address"
+cd $HOME/workspace
+ruby ./bosh-might/bosh-might.rb "$cf_release_version" "$ip_address"

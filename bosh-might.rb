@@ -108,7 +108,7 @@ local_command "wget https://github.com/cloudfoundry-incubator/spiff/releases/dow
 term_out "Install Spiff"
 local_command "sudo unzip -oq ~/workspace/spiff_linux_amd64.zip -d /usr/local/bin/"
 term_out "Cloning into CF-Release"
-local_command "git clone https://www.github.com/cloudfoundry/cf-release ./workspace/cf-release"
+local_command "git clone https://www.github.com/cloudfoundry/cf-release ~/workspace/cf-release"
 term_out "Target local bosh-lite"
 local_command "bosh -n target 127.0.0.1"
 local_command "sudo chown ubuntu:ubuntu /home/ubuntu/.bosh_config"
@@ -134,7 +134,7 @@ term_out "Spiff manifest"
 local_command "cd ~/workspace/cf-release; ./bosh-lite/make_manifest", true
 
 term_out "Fix IP address"
-local_command "sed -i 's/10.244.0.34.xip.io/#{ip_address}.xip.io/g' ./bosh-lite/manifests/cf-manifest.yml"
+local_command "cd ~/workspace/cf-release; sed -i 's/10.244.0.34.xip.io/#{ip_address}.xip.io/g' ./bosh-lite/manifests/cf-manifest.yml"
 
 term_out "Bosh Deploy"
 local_command "bosh -n deploy", true
