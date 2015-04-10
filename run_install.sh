@@ -13,9 +13,9 @@ sed -i 's/5000m/10000m/g' /var/vcap/data/jobs/director/fake-job-template-version
 monit restart director_nginx
 
 # Apply iptables rules
-iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 80 -j DNAT --to-destination 10.244.0.34:80
-iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 443 -j DNAT --to-destination 10.244.0.34:443
-iptables -t nat -A PREROUTING -d "$ipaddress/32" -p tcp -m tcp --dport 4443 -j DNAT --to-destination 10.244.0.34:4443
+iptables -t nat -A PREROUTING -d "$ip_address/32" -p tcp -m tcp --dport 80 -j DNAT --to-destination 10.244.0.34:80
+iptables -t nat -A PREROUTING -d "$ip_address/32" -p tcp -m tcp --dport 443 -j DNAT --to-destination 10.244.0.34:443
+iptables -t nat -A PREROUTING -d "$ip_address/32" -p tcp -m tcp --dport 4443 -j DNAT --to-destination 10.244.0.34:4443
 
 # Save iptables
 /sbin/iptables-save > /etc/iptables.rules
